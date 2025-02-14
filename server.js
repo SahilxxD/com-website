@@ -10,6 +10,8 @@ const PORT = 8000;
 
 app.use(express.json())
 
+app.use('/api/auth', require('./routes/authRoutes'));
+
 app.get('/',(req, res) => {
     res.send('Welcome to ecom');
 });
