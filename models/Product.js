@@ -27,4 +27,7 @@ const ProductSchema = new mongoose.Schema({
     }
 });
 
+// 🔹 Create Full-Text Index on `name` and `description`
+ProductSchema.index({name: 'text', description: 'text'});
+
 module.exports = mongoose.model('Product', ProductSchema);

@@ -30,6 +30,11 @@ exports.getAllProduct = async (req, res) => {
     try{
         let query = {};
 
+        // 🔹 Full-Text Search
+        if (req.query.search) {
+            query.$text = { $search: req.query.search};
+        }
+
         // 🔹 Filtering by Category
         if (req.query.category) {
             query.category = req.query.category;
