@@ -28,10 +28,45 @@ exports.addProduct = async (req, res) => {
 
 exports.getAllProduct = async (req, res) => {
     try{
-        const products = await Product.find();
-        res.json(products);
+        let query = {};
+
+        // 🔹 Filtering by Category
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+
+        // 🔹 Filtering by Price Range
+        if (req.query.minPrice && req.query.maxPrice) {
+            query.price = { $gte: Number(req.query.minPrice), $lte: Number(req.query.maxPrice) };
+        }
+
+        let sort = {};
+        if(req.query.sort){
+            const sortField = req.query.sort.replace('-','');
+            sort[sortField] = req.query.sort.startsWith('-') ? -1 : 1; // Ascending or Descending
+        }
+
+        // 🔹 Pagination
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 2;
+        const skip = (page - 1) * limit;
+
+        const products = await Product.find(query)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit);
+
+        const totalProducts = await Product.countDocuments(query)
+
+        res.json({
+            success: true,
+            totalPage: Math.ceil(totalProducts / limit),
+            currentPage: page,
+            totalProducts,
+            products,
+        });
     } catch (err) {
-        res.status(500).json({message: 'Server Error'});
+        res.status(500).json({message: err.message});
     }
 }
 
