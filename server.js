@@ -23,6 +23,8 @@ app.use('/api/user', require('./routes/userRoutes'));
 
 app.use('/api/product', require('./routes/productRoutes'));
 
+app.use('/api/cart', require('./routes/cartRoutes'));
+
 app.get('/',(req, res) => {
     res.send('Welcome to ecom');
 });
