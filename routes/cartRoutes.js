@@ -17,10 +17,6 @@ router.post('/add',
     validate,
     addCart);
 router.get('/',protect,
-    [
-        param('productId')
-            .isMongoId().withMessage('Invalid product ID format'),
-    ],
     validate,
     viewCart);
 router.delete(':productId', protect,

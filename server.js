@@ -25,6 +25,8 @@ app.use('/api/product', require('./routes/productRoutes'));
 
 app.use('/api/cart', require('./routes/cartRoutes'));
 
+app.use('/api/orders', require('./routes/orderRoutes'))
+
 app.get('/',(req, res) => {
     res.send('Welcome to ecom');
 });
