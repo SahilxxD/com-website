@@ -14,7 +14,7 @@ exports.addProduct = async (req, res) => {
             name,
             price,
             description,
-            image,
+            image: req.file.path,
             category,
             stock
         });
