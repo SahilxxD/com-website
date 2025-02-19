@@ -1,5 +1,7 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
+const User = require('../models/User')
+const sendEmail = require('../services/emailService');
 
 exports.createOrder = async(req, res) => {
     try {
@@ -16,6 +18,17 @@ exports.createOrder = async(req, res) => {
         });
 
         await order.save();
+
+        // Fetch user details
+        const user = await User.findById(req.user.id);
+
+        // Send order confirmation email
+        await sendEmail(user.email, 'Order Confirmation', '../templates/orderConfirmation.ejs', {
+            name: user.name,
+            orderId: order._id,
+            items: items,
+            total,
+        });
 
         // Clear user cart after placing an order
         await Cart.deleteOne({ user: req.user.id });

@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const User = require('../models/User');
+const sendEmail = require('../services/emailService');
 
 exports.signup = async (req, res) => {
     const errors = validationResult(req);
@@ -24,6 +25,8 @@ exports.signup = async (req, res) => {
 
         user = new User({name, email, password});
         await user.save();
+        // Send welcome email
+        await sendEmail(email, 'Welcome to Our Store!', "../templates/welcome.ejs", { name });
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
             expiresIn: '1h'
