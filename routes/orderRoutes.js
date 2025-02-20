@@ -2,16 +2,13 @@ const express = require('express');
 const { body } = require('express-validator');
 const {protect, isAdmin} = require('../middleware/authMiddleware');
 const { createOrder, getUserOrders, getAllOrders, updateOrderStatus } = require('../controllers/orderController');
+const { processPayment } = require('../controllers/paymentController');
 
 const router = express.Router();
 
 //Place an order
-router.post('/', protect,
-    [
-        body('items').isArray({ min: 1 }).withMessage('At least one product is required'),
-        body('total').isNumeric().withMessage('Total amount must be a number'),
-    ],
-    createOrder
+router.post('/payment', protect,
+    processPayment
 );
 
 //Get orders for logged-in user

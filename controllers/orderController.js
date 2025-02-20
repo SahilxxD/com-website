@@ -3,41 +3,41 @@ const Cart = require('../models/Cart');
 const User = require('../models/User')
 const sendEmail = require('../services/emailService');
 
-exports.createOrder = async(req, res) => {
-    try {
-        const {items, total} = req.body;
+// exports.createOrder = async(req, res) => {
+//     try {
+//         const {items, total} = req.body;
 
-        if(!items || items.length === 0) {
-            return res.status(400).json({message: 'No items in order'});
-        }
+//         if(!items || items.length === 0) {
+//             return res.status(400).json({message: 'No items in order'});
+//         }
+        
+//         const order = new Order({
+//             user: req.user.id,
+//             items,
+//             total
+//         });
 
-        const order = new Order({
-            user: req.user.id,
-            items,
-            total
-        });
+//         await order.save();
 
-        await order.save();
+//         // Fetch user details
+//         const user = await User.findById(req.user.id);
 
-        // Fetch user details
-        const user = await User.findById(req.user.id);
+//         // Send order confirmation email
+//         await sendEmail(user.email, 'Order Confirmation', '../templates/orderConfirmation.ejs', {
+//             name: user.name,
+//             orderId: order._id,
+//             items: items,
+//             total,
+//         });
 
-        // Send order confirmation email
-        await sendEmail(user.email, 'Order Confirmation', '../templates/orderConfirmation.ejs', {
-            name: user.name,
-            orderId: order._id,
-            items: items,
-            total,
-        });
+//         // Clear user cart after placing an order
+//         await Cart.deleteOne({ user: req.user.id });
 
-        // Clear user cart after placing an order
-        await Cart.deleteOne({ user: req.user.id });
-
-        res.status(201).json(order)
-    } catch (error) {
-        res.status(500).json({message: error.message});
-    }
-};
+//         res.status(201).json(order)
+//     } catch (error) {
+//         res.status(500).json({message: error.message});
+//     }
+// };
 
 exports.getUserOrders = async (req, res) => {
     try {
