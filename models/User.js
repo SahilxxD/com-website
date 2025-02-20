@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         unique: true,
         sparse: true,
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false, // Set to true manually for admin users
     }
 })
 

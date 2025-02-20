@@ -1,11 +1,12 @@
 const express = require('express');
 const { addProduct, getAllProduct, getProduct, editProduct, deleteProduct } = require('../controllers/productController');
-const protect = require('../middleware/authMiddleware');
+const {protect, isAdmin} = require('../middleware/authMiddleware');
 const router = express.Router();
 const { body } = require('express-validator');
 const upload = require('../config/multerConfig');
 
 router.post('/',
+    isAdmin,
     protect,
     upload.single('image'), // Multer middleware to handle single file upload
     [
@@ -28,11 +29,13 @@ router.get('/:id',
 
 router.put('/:id',
     protect,
+    isAdmin,
     editProduct
 )
 
 router.delete('/:id',
     protect,
+    isAdmin,
     deleteProduct
 )
 

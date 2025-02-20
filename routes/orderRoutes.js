@@ -1,6 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
-const protect = require('../middleware/authMiddleware');
+const {protect, isAdmin} = require('../middleware/authMiddleware');
 const { createOrder, getUserOrders, getAllOrders, updateOrderStatus } = require('../controllers/orderController');
 
 const router = express.Router();
@@ -21,7 +21,7 @@ router.get('/',protect,getUserOrders);
 router.get('/all', protect, getAllOrders);
 
 //update order status
-router.put('/:id', protect,
+router.put('/:id', protect, isAdmin,
     [
         body('status').isIn(['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled']).withMessage('Invalid order status'),
     ],
