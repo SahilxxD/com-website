@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const {body, validationResult } = require('express-validator');
+const redisClient = require('../config/redisConfig');
 
 exports.addProduct = async (req, res) => {
     const errors = validationResult(req);
@@ -20,6 +21,7 @@ exports.addProduct = async (req, res) => {
         });
         await newProduct.save();
 
+        await redisClient.flushDb();
         res.status(201).json(newProduct);
     } catch (err) {
         res.status(500).json({ message: 'Server Error'})
@@ -56,6 +58,15 @@ exports.getAllProduct = async (req, res) => {
         const limit = Number(req.query.limit) || 2;
         const skip = (page - 1) * limit;
 
+        // 🔹 **Generate a unique cache key based on filters**
+        const cacheKey = `products:${JSON.stringify(query)}:sort:${JSON.stringify(sort)}:page:${page}:limit:${limit}`;
+
+        // 🔹 **Check if the data is cached in Redis**
+        const cachedProducts = await redisClient.get(cacheKey);
+        if (cachedProducts) {
+            return res.json(JSON.parse(cachedProducts));
+        }
+
         const products = await Product.find(query)
             .sort(sort)
             .skip(skip)
@@ -63,13 +74,18 @@ exports.getAllProduct = async (req, res) => {
 
         const totalProducts = await Product.countDocuments(query)
 
-        res.json({
+        const responseData = {
             success: true,
-            totalPage: Math.ceil(totalProducts / limit),
+            totalPages: Math.ceil(totalProducts / limit),
             currentPage: page,
             totalProducts,
-            products,
-        });
+            groupedProducts,
+        };
+
+        // 🔹 **Store result in Redis (cache expires in 1 hour)**
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(responseData));
+
+        res.json(responseData);
     } catch (err) {
         res.status(500).json({message: err.message});
     }
@@ -100,8 +116,10 @@ exports.editProduct = async(req, res) => {
         product.image = image || product.image;
         product.category = category || product.category;
         product.stock = stock || product.stock;
-
+        
         await product.save();
+
+        await redisClient.flushDb();
 
         res.json(product)
     } catch (err) {
@@ -118,6 +136,9 @@ exports.deleteProduct = async(req, res) => {
         }
 
         await product.remove();
+
+        await redisClient.flushDb();
+
         res.json({message: 'Product deleted'})
     } catch (err) {
         res.status(500).json({message: 'Server error'});
